@@ -48,8 +48,14 @@ var crypton = {};
   crypton.MIN_PBKDF2_ROUNDS = 1000;
 
   /**!
+   * ### offline
+   * client connection state
+   */
+  crypton.offline = false;
+
+  /**!
    * ### clientVersionMismatch
-   * Holds cleint <-> server version mismatch status
+   * Holds client <-> server version mismatch status
    */
   crypton.clientVersionMismatch = undefined;
 
@@ -383,6 +389,144 @@ var crypton = {};
       }
     });
   };
+  
+  /**!
+   * ### login(username, passphrase, callback)
+   * Perform zero-knowledge authorization with given `username`
+   * and `passphrase`, generating a session if successful
+   *
+   * Calls back with session and without error if successful
+   *
+   * Calls back with error if unsuccessful
+   *
+   * SRP variables are named as defined in RFC 5054
+   * and RFC 2945, prefixed with 'srp'
+   *
+   * @param {String} username
+   * @param {String} passphrase
+   * @param {Function} callback
+   * @param {Object} data
+   * @param {Object} options
+   */
+  crypton.login = function(username, passphrase, callback, data, options) {
+    if (crypton.offline) {
+      var sessionId = window.sessionStorage.getItem('sessionId');
+      var srpM2 = window.sessionStorage.getItem('srpM2');
+      var session = window.sessionStorage.getItem('cryptoSession');
+      options = window.sessionStorage.getItem('srpM1Options');
+      crypton.sessionId = sessionId;
+      crypton.work.calculateSrpM1(options, function(err, srpM1, ourSrpM2) {
+        if (!constEqual(srpM2, ourSrpM2)) {
+          callback('Server could not be verified');
+          return;
+        }
+        session.account.unravel(function(err) {
+          if (err) {
+            return callback(err);
+          }
+          // check for internal 'trusted peers' Item
+          session.getOrCreateItem(crypton.trustedPeers,
+            function(err, item) {
+              if (err) {
+                var _err = 'Cannot get "trusted peers" Item';
+                console.error(_err, err);
+                // still need to return the session
+                return callback(_err, session);
+              }
+              return callback(null, session);
+            }
+          );
+        });
+      });
+    } else {
+      var response = {
+        srpA: data.srpAstr,
+      };
+      superagent.post(crypton.url() + '/account/' + username)
+        .withCredentials()
+        .send(response)
+        .end(function(res) {
+          if (!res.body || res.body.success !== true) {
+             return callback(res.body.error);
+          }
+          // check for response session header:
+          // XXX: Make sure we have a sid!
+          crypton.sessionId = res.body.sid;
+          window.sessionStorage.setItem('sessionId', res.body.sid);
+
+          options.a = data.a;
+          options.srpA = data.srpA;
+          options.srpB = res.body.srpB;
+          options.srpSalt = res.body.srpSalt;
+
+          window.sessionStorage.setItem('srpM1Options', options);
+
+          // calculateSrpM1
+          crypton.work.calculateSrpM1(options, function(err, srpM1, ourSrpM2) {
+            response = {
+              srpM1: srpM1,
+            };
+
+            var url = crypton.url() + '/account/' + username + '/answer?sid=' + crypton.sessionId;
+            superagent.post(url)
+              .withCredentials()
+              .send(response)
+              .end(function(res) {
+                if (!res.body || res.body.success !== true) {
+                  callback(res.body.error);
+                  return;
+                }
+ 
+                if (!constEqual(res.body.srpM2, ourSrpM2)) {
+                  callback('Server could not be verified');
+                  return;
+                }
+
+                window.sessionStorage.setItem('srpM2', res.body.srpM2);
+
+                var session = new crypton.Session(crypton.sessionId);
+                session.account = new crypton.Account();
+                session.account.username = username;
+                session.account.passphrase = passphrase;
+                session.account.challengeKey = res.body.account.challengeKey;
+                session.account.containerNameHmacKeyCiphertext = res.body.account.containerNameHmacKeyCiphertext;
+                session.account.hmacKeyCiphertext = res.body.account.hmacKeyCiphertext;
+                session.account.keypairCiphertext = res.body.account.keypairCiphertext;
+                session.account.keypairMac = res.body.account.keypairMac;
+                session.account.pubKey = res.body.account.pubKey;
+                session.account.challengeKeySalt = res.body.account.challengeKeySalt;
+                session.account.keypairSalt = res.body.account.keypairSalt;
+                session.account.keypairMacSalt = res.body.account.keypairMacSalt;
+                session.account.signKeyPub = res.body.account.signKeyPub;
+                session.account.signKeyPrivateCiphertext = res.body.account.signKeyPrivateCiphertext;
+                session.account.signKeyPrivateMacSalt = res.body.account.signKeyPrivateMacSalt;
+                session.account.signKeyPrivateMac = res.body.account.signKeyPrivateMac;
+
+                window.sessionStorage.setItem('cryptoSession', session);
+
+                session.account.unravel(function(err) {
+                  if (err) {
+                    return callback(err);
+                  }
+
+                  // check for internal 'trusted peers' Item
+                  session.getOrCreateItem(crypton.trustedPeers,
+                    function(err, item) {
+                      if (err) {
+                        var _err = 'Cannot get "trusted peers" Item';
+                        console.error(_err, err);
+                        // still need to return the session
+                        return callback(_err, session);
+                      }
+                      return callback(null, session);
+                    }
+                  );
+                });
+              });
+          });
+        });
+    }
+  },
 
   /**!
    * ### authorize(username, passphrase, callback)
@@ -408,7 +552,9 @@ var crypton = {};
 
     options = options || {};
     var check = typeof options.check !== 'undefined' ? options.check : true;
-
+    if (crypton.offline){
+      check = false;
+    }
     crypton.versionCheck(!check, function(err) {
       if (err) {
         return callback(MISMATCH_ERR);
@@ -432,89 +578,8 @@ var crypton = {};
             return callback(err);
           }
 
-          var response = {
-            srpA: data.srpAstr,
-          };
+          crypton.login(username, passphrase, callback, data, options);
 
-          superagent.post(crypton.url() + '/account/' + username)
-            .withCredentials()
-            .send(response)
-            .end(function(res) {
-              if (!res.body || res.body.success !== true) {
-                return callback(res.body.error);
-              }
-
-              // check for response session header:
-              // XXX: Make sure we have a sid!
-              crypton.sessionId = res.body.sid;
-              window.sessionStorage.setItem('sessionId', res.body.sid);
-
-              options.a = data.a;
-              options.srpA = data.srpA;
-              options.srpB = res.body.srpB;
-              options.srpSalt = res.body.srpSalt;
-
-              // calculateSrpM1
-              crypton.work.calculateSrpM1(options, function(err, srpM1, ourSrpM2) {
-                response = {
-                  srpM1: srpM1,
-                };
-
-                var url = crypton.url() +
-                  '/account/' + username + '/answer?sid=' + crypton.sessionId;
-                superagent.post(url)
-                  .withCredentials()
-                  .send(response)
-                  .end(function(res) {
-                    if (!res.body || res.body.success !== true) {
-                      callback(res.body.error);
-                      return;
-                    }
-
-                    if (!constEqual(res.body.srpM2, ourSrpM2)) {
-                      callback('Server could not be verified');
-                      return;
-                    }
-
-                    var session = new crypton.Session(crypton.sessionId);
-                    session.account = new crypton.Account();
-                    session.account.username = username;
-                    session.account.passphrase = passphrase;
-                    session.account.challengeKey = res.body.account.challengeKey;
-                    session.account.containerNameHmacKeyCiphertext = res.body.account.containerNameHmacKeyCiphertext;
-                    session.account.hmacKeyCiphertext = res.body.account.hmacKeyCiphertext;
-                    session.account.keypairCiphertext = res.body.account.keypairCiphertext;
-                    session.account.keypairMac = res.body.account.keypairMac;
-                    session.account.pubKey = res.body.account.pubKey;
-                    session.account.challengeKeySalt = res.body.account.challengeKeySalt;
-                    session.account.keypairSalt = res.body.account.keypairSalt;
-                    session.account.keypairMacSalt = res.body.account.keypairMacSalt;
-                    session.account.signKeyPub = res.body.account.signKeyPub;
-                    session.account.signKeyPrivateCiphertext = res.body.account.signKeyPrivateCiphertext;
-                    session.account.signKeyPrivateMacSalt = res.body.account.signKeyPrivateMacSalt;
-                    session.account.signKeyPrivateMac = res.body.account.signKeyPrivateMac;
-                    session.account.unravel(function(err) {
-                      if (err) {
-                        return callback(err);
-                      }
-
-                      // check for internal 'trusted peers' Item
-                      session.getOrCreateItem(crypton.trustedPeers,
-                        function(err, item) {
-                          if (err) {
-                            var _err = 'Cannot get "trusted peers" Item';
-                            console.error(_err, err);
-
-                            // still need to return the session
-                            return callback(_err, session);
-                          }
-
-                          return callback(null, session);
-                        });
-                    });
-                  });
-              });
-            });
         });
       }
     });
