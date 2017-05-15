@@ -414,6 +414,12 @@ var crypton = {};
       var srpM2 = window.sessionStorage.getItem('srpM2');
       var session = window.sessionStorage.getItem('cryptoSession');
       options = window.sessionStorage.getItem('srpM1Options');
+
+      if (sessionId === null || srpM2 === null || session === null) {
+        callback('Offline server could not be verified');
+        return;
+      }
+
       crypton.sessionId = sessionId;
       crypton.work.calculateSrpM1(options, function(err, srpM1, ourSrpM2) {
         if (!constEqual(srpM2, ourSrpM2)) {
