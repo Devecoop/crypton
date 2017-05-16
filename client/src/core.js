@@ -404,6 +404,51 @@ crypton.generateAccount = function (username, passphrase, callback, options) {
     return session;
   };
 
+  /**!
+   * ### loginWithStorage(username, passphrase, callback, data, options)
+   * Perform zero-knowledge login with given `username`
+   * and `passphrase` with offline data in sessionStorage
+   * generating a session if successful
+   *
+   * Calls back with session and without error if successful
+   *
+   * Calls back with error if unsuccessful
+   *
+   * SRP variables are named as defined in RFC 5054
+   * and RFC 2945, prefixed with 'srp'
+   *
+   * @param {String} username
+   * @param {String} passphrase
+   * @param {Function} callback
+   * @param {Object} data
+   * @param {Object} options
+   */
+  crypton.loginWithStorage = function(username, passphrase, callback, data, options) {
+    var sessionData = JSON.parse(window.sessionStorage.getItem('crypton')).Session;
+    if (sessionData === null) {
+      callback('Offline server could not be verified');
+      return;
+    }
+    crypton.sessionId = sessionData.sessionId;
+    var session = crypton.makeSession(sessionData.sessionId, sessionData.account);
+    session.account.username = username;
+    session.account.passphrase = passphrase;
+    sessionData.options.username = username;
+    sessionData.options.passphrase = passphrase;
+    crypton.work.calculateSrpM1(sessionData.options, function(err, srpM1, ourSrpM2) {
+      if (!constEqual(sessionData.srpM2, ourSrpM2)) { 
+        callback('Server could not be verified');
+        return;
+      }
+      session.account.unravel(function(err) {
+        if (err) {
+          return callback(err);
+        }
+        return callback(null, session);
+      });
+    });
+  };
+
  * ### authorize(username, passphrase, callback)
  * Perform zero-knowledge authorization with given `username`
  * and `passphrase`, generating a session if successful
