@@ -692,6 +692,13 @@
   Session.prototype.create = function(containerName, callback) {
     console.warn('CONTAINERS ARE DEPRECATED, use the "Items" API');
 
+    if (!crypton.online){
+      var container = JSON.parse(window.sessionStorage.getItem('crypton')).containers[containerName];
+      if (container === null){
+        return callback('Container not found in sessionStorage');
+      }
+      return callback(null, container);
+    }
     for (var i in this.containers) {
       if (crypton.constEqual(this.containers[i].name, containerName)) {
         callback('Container already exists');
@@ -773,6 +780,12 @@
           container.name = containerName;
           container.sessionKey = sessionKey;
           _this.containers.push(container);
+
+          // Save object in sessionStorage
+          var cryptonToLocalStorage = JSON.parse(window.sessionStorage.getItem('crypton'));
+          cryptonToLocalStorage.containers[containerName] = container;
+          window.sessionStorage.setItem('crypton', JSON.stringify(cryptonToLocalStorage));
+
           callback(null, container);
         });
       });

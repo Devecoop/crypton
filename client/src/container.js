@@ -239,6 +239,10 @@
     var containerNameHmac = this.getPublicName();
     var currentVersion = this.latestVersion();
 
+    if (!crypton.online) {
+      var containers = JSON.parse(window.sessionStorage.getItem('crypton')).containers[containerNameHmac + currentVersion];
+      return callback(null, containers);
+    }
     var url = crypton.url() + '/container/' + containerNameHmac + '?after=' + (currentVersion + 1) + '&sid=' + crypton.sessionId;
     console.log('getHistory', url);
     superagent.get(url)
@@ -249,6 +253,10 @@
           return;
         }
 
+        // Save object in sessionStorage
+        var cryptonToLocalStorage = JSON.parse(window.sessionStorage.getItem('crypton'));
+        cryptonToLocalStorage.containers[containerNameHmac + currentVersion] = res.body.records;
+        window.sessionStorage.setItem('crypton', JSON.stringify(cryptonToLocalStorage));
         callback(null, res.body.records);
       });
   };
