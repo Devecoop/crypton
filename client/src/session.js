@@ -649,6 +649,15 @@ Session.prototype.loadWithHmac = function (containerNameHmac, peer, callback) {
  * @param {Function} callback
  */
 Session.prototype.create = function (containerName, callback) {
+
+  if (!crypton.online){
+    var container = JSON.parse(window.sessionStorage.getItem('crypton')).containers[containerName];
+    if (container === null){
+      return callback('Container not found in sessionStorage');
+    }
+    return callback(null, container);
+  }
+
   for (var i in this.containers) {
     if (crypton.constEqual(this.containers[i].name, containerName)) {
       callback('Container already exists');

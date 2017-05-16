@@ -234,6 +234,11 @@ Container.prototype.getPublicName = function () {
 Container.prototype.getHistory = function (callback) {
   var containerNameHmac = this.getPublicName();
   var currentVersion = this.latestVersion();
+  
+  if (!crypton.online) {
+    var containers = JSON.parse(window.sessionStorage.getItem('crypton')).containers[containerNameHmac + currentVersion];
+    return callback(null, containers);
+  }
 
   var url = crypton.url() + '/container/' + containerNameHmac + '?after=' + (currentVersion + 1) + '&sid=' + crypton.sessionId;
   console.log('getHistory', url);
