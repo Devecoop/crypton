@@ -8,7 +8,7 @@ branches:
     - stable
     - test
     - encryptr
-    - entryptr_test
+    - encryptr_test
 
 services:
   - redis-server
