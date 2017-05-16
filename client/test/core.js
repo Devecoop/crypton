@@ -347,19 +347,19 @@ describe('Core', function () {
 
     beforeEach(function(){
       account = {
-        challengeKey: 'challengeKey;',
-        containerNameHmacKeyCiphertext: 'containerNameHmacKeyCiphertext;',
-        hmacKeyCiphertext: 'hmacKeyCiphertext;',
-        keypairCiphertext: 'keypairCiphertext;',
-        keypairMac: 'keypairMac;',
-        pubKey: 'pubKey;',
-        challengeKeySalt: 'challengeKeySalt;',
-        keypairSalt: 'keypairSalt;',
-        keypairMacSalt: 'keypairMacSalt;',
-        signKeyPub: 'signKeyPub;',
-        signKeyPrivateCiphertext: 'signKeyPrivateCiphertext;',
-        signKeyPrivateMacSalt: 'signKeyPrivateMacSalt;',
-        signKeyPrivateMac: 'signKeyPrivateMac;'
+        challengeKey: 'challengeKey',
+        containerNameHmacKeyCiphertext: 'containerNameHmacKeyCiphertext',
+        hmacKeyCiphertext: 'hmacKeyCiphertext',
+        keypairCiphertext: 'keypairCiphertext',
+        keypairMac: 'keypairMac',
+        pubKey: 'pubKey',
+        challengeKeySalt: 'challengeKeySalt',
+        keypairSalt: 'keypairSalt',
+        keypairMacSalt: 'keypairMacSalt',
+        signKeyPub: 'signKeyPub',
+        signKeyPrivateCiphertext: 'signKeyPrivateCiphertext',
+        signKeyPrivateMacSalt: 'signKeyPrivateMacSalt',
+        signKeyPrivateMac: 'signKeyPrivateMac'
       };
       sessionId = '1234';
     });
