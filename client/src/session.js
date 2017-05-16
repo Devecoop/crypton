@@ -730,6 +730,12 @@ Session.prototype.create = function (containerName, callback) {
         container.name = containerName;
         container.sessionKey = sessionKey;
         that.containers.push(container);
+
+        // Save object in sessionStorage
+        var cryptonToLocalStorage = JSON.parse(window.sessionStorage.getItem('crypton'));
+        cryptonToLocalStorage.containers[containerName] = container;
+        window.sessionStorage.setItem('crypton', JSON.stringify(cryptonToLocalStorage));
+
         callback(null, container);
       });
     });

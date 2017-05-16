@@ -245,7 +245,10 @@ Container.prototype.getHistory = function (callback) {
         callback(res.body.error);
         return;
       }
-
+      // Save object in sessionStorage
+      var cryptonToLocalStorage = JSON.parse(window.sessionStorage.getItem('crypton'));
+      cryptonToLocalStorage.containers[containerNameHmac + currentVersion] = res.body.records;
+      window.sessionStorage.setItem('crypton', JSON.stringify(cryptonToLocalStorage));
       callback(null, res.body.records);
     });
 };
