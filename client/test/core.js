@@ -28,6 +28,11 @@ describe('Core', function () {
       assert.equal(crypton.version, version);
     });
 
+    it('should have the correct online state', function () {
+      var online = true;
+      assert.equal(crypton.online, online);
+    });
+
     it('should have the correct host', function () {
       assert.equal(crypton.host, 'localhost');
     });
@@ -318,6 +323,121 @@ describe('Core', function () {
     });
 
     // TODO should we just test this functionality in the integration tests?:q
+  });
+
+  describe('account login', function () {
+    it('should exist', function () {
+      assert(typeof crypton.login == 'function');
+    });
+
+    // TODO should we just test this functionality in the integration tests?:q
+  });
+
+  describe('account loginWithStorage', function () {
+    it('should exist', function () {
+      assert(typeof crypton.loginWithStorage == 'function');
+    });
+
+    // TODO should we just test this functionality in the integration tests?:q
+  });
+
+  describe('account makeSession', function () {
+
+    var account, sessionId;
+
+    beforeEach(function(){
+      account = {
+        challengeKey: 'challengeKey;',
+        containerNameHmacKeyCiphertext: 'containerNameHmacKeyCiphertext;',
+        hmacKeyCiphertext: 'hmacKeyCiphertext;',
+        keypairCiphertext: 'keypairCiphertext;',
+        keypairMac: 'keypairMac;',
+        pubKey: 'pubKey;',
+        challengeKeySalt: 'challengeKeySalt;',
+        keypairSalt: 'keypairSalt;',
+        keypairMacSalt: 'keypairMacSalt;',
+        signKeyPub: 'signKeyPub;',
+        signKeyPrivateCiphertext: 'signKeyPrivateCiphertext;',
+        signKeyPrivateMacSalt: 'signKeyPrivateMacSalt;',
+        signKeyPrivateMac: 'signKeyPrivateMac;'
+      };
+      sessionId = '1234';
+    });
+
+    it('should exist', function () {
+      assert(typeof crypton.makeSession == 'function');
+    });
+
+    it('should return correct challengeKey in account', function() {
+      var session = crypton.makeSession(sessionId, account);
+      assert.equal(session.account.challengeKey, 'challengeKey');
+    });
+
+    it('should return correct challengeKey in account', function() {
+      var session = crypton.makeSession(sessionId, account);
+      assert.equal(session.account.challengeKey, 'challengeKey');
+    });
+
+    it('should return correct containerNameHmacKeyCiphertext in account', function() {
+      var session = crypton.makeSession(sessionId, account);
+      assert.equal(session.account.containerNameHmacKeyCiphertext, 'containerNameHmacKeyCiphertext');
+    });
+    
+    it('should return correct hmacKeyCiphertext in account', function() {
+      var session = crypton.makeSession(sessionId, account);
+      assert.equal(session.account.hmacKeyCiphertext, 'hmacKeyCiphertext');
+    });
+    
+    it('should return correct keypairCiphertext in account', function() {
+      var session = crypton.makeSession(sessionId, account);
+      assert.equal(session.account.keypairCiphertext, 'keypairCiphertext');
+    });
+    
+    it('should return correct keypairMac in account', function() {
+      var session = crypton.makeSession(sessionId, account);
+      assert.equal(session.account.keypairMac, 'keypairMac');
+    });
+    
+    it('should return correct pubKey in account', function() {
+      var session = crypton.makeSession(sessionId, account);
+      assert.equal(session.account.pubKey, 'pubKey');
+    });
+    
+    it('should return correct challengeKeySalt in account', function() {
+      var session = crypton.makeSession(sessionId, account);
+      assert.equal(session.account.challengeKeySalt, 'challengeKeySalt');
+    });
+    
+    it('should return correct keypairSalt in account', function() {
+      var session = crypton.makeSession(sessionId, account);
+      assert.equal(session.account.keypairSalt, 'keypairSalt');
+    });
+    
+    it('should return correct keypairMacSalt in account', function() {
+      var session = crypton.makeSession(sessionId, account);
+      assert.equal(session.account.keypairMacSalt, 'keypairMacSalt');
+    });
+    
+    it('should return correct signKeyPub in account', function() {
+      var session = crypton.makeSession(sessionId, account);
+      assert.equal(session.account.signKeyPub, 'signKeyPub');
+    });
+    
+    it('should return correct signKeyPrivateCiphertext in account', function() {
+      var session = crypton.makeSession(sessionId, account);
+      assert.equal(session.account.signKeyPrivateCiphertext, 'signKeyPrivateCiphertext');
+    });
+    
+    it('should return correct signKeyPrivateMacSalt in account', function() {
+      var session = crypton.makeSession(sessionId, account);
+      assert.equal(session.account.signKeyPrivateMacSalt, 'signKeyPrivateMacSalt');
+    });
+    
+    it('should return correct signKeyPrivateMac in account', function() {
+      var session = crypton.makeSession(sessionId, account);
+      assert.equal(session.account.signKeyPrivateMac, 'signKeyPrivateMac');
+    });
+    
   });
 
   describe('hmac()', function () {
