@@ -377,6 +377,33 @@ crypton.generateAccount = function (username, passphrase, callback, options) {
 };
 
 /**!
+   * ### makeSession(sessionId, account)
+   * 
+   * Makes and return new session and account for user in login
+   *
+   * @param {string} sessionId
+   * @param {Object} account
+   */
+  crypton.makeSession = function(sessionId, account){
+    crypton.sessionId = sessionId;
+    var session = new crypton.Session(crypton.sessionId);
+    session.account = new crypton.Account();
+    session.account.challengeKey = account.challengeKey;
+    session.account.containerNameHmacKeyCiphertext = account.containerNameHmacKeyCiphertext;
+    session.account.hmacKeyCiphertext = account.hmacKeyCiphertext;
+    session.account.keypairCiphertext = account.keypairCiphertext;
+    session.account.keypairMac = account.keypairMac;
+    session.account.pubKey = account.pubKey;
+    session.account.challengeKeySalt = account.challengeKeySalt;
+    session.account.keypairSalt = account.keypairSalt;
+    session.account.keypairMacSalt = account.keypairMacSalt;
+    session.account.signKeyPub = account.signKeyPub;
+    session.account.signKeyPrivateCiphertext = account.signKeyPrivateCiphertext;
+    session.account.signKeyPrivateMacSalt = account.signKeyPrivateMacSalt;
+    session.account.signKeyPrivateMac = account.signKeyPrivateMac;
+    return session;
+  };
+
  * ### authorize(username, passphrase, callback)
  * Perform zero-knowledge authorization with given `username`
  * and `passphrase`, generating a session if successful
