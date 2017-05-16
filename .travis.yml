@@ -8,6 +8,8 @@ branches:
     - master
     - stable
     - test
+    - encryptr
+    - encryptr_test
 
 services:
   - redis-server
