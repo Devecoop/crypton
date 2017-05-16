@@ -43,7 +43,7 @@ crypton.online = true;
 
 /**!
  * ### clientVersionMismatch
- * Holds cleint <-> server version mismatch status
+ * Holds client <-> server version mismatch status
  */
 crypton.clientVersionMismatch = undefined;
 
