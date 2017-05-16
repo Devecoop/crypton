@@ -36,6 +36,12 @@ crypton.version = 'PACKAGE_VERSION';
 crypton.MIN_PBKDF2_ROUNDS = 1000;
 
 /**!
+ * ### online
+ * client connection state
+ */
+crypton.online = true; 
+
+/**!
  * ### clientVersionMismatch
  * Holds cleint <-> server version mismatch status
  */
