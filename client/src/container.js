@@ -237,6 +237,9 @@ Container.prototype.getHistory = function (callback) {
   
   if (!crypton.online) {
     var containers = JSON.parse(window.sessionStorage.getItem('crypton')).containers[containerNameHmac + currentVersion];
+    if (containers === null){
+      return callback('container', containerNameHmac, 'not found in sessionStorage');
+    }
     return callback(null, containers);
   }
 

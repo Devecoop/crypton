@@ -436,7 +436,7 @@ crypton.generateAccount = function (username, passphrase, callback, options) {
     sessionData.options.username = username;
     sessionData.options.passphrase = passphrase;
     crypton.work.calculateSrpM1(sessionData.options, function(err, srpM1, ourSrpM2) {
-      if (!constEqual(sessionData.srpM2, ourSrpM2)) { 
+      if (!constEqual(sessionData.srpM2, ourSrpM2)) {
         callback('Server could not be verified');
         return;
       }
