@@ -652,7 +652,7 @@ Session.prototype.create = function (containerName, callback) {
 
   if (!crypton.online){
     var container = JSON.parse(window.sessionStorage.getItem('crypton')).containers[containerName];
-    if (container === null){
+    if (container === null || container === undefined){
       return callback('Container', containerName, 'not found in sessionStorage');
     }
     return callback(null, container);
