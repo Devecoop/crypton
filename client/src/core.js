@@ -424,6 +424,10 @@ crypton.generateAccount = function (username, passphrase, callback, options) {
    * @param {Object} options
    */
   crypton.loginWithStorage = function(username, passphrase, callback, data, options) {
+    var cryptonData = window.sessionStorage.getItem('crypton');
+    if (!cryptonData) {
+      return callback('We are having trouble reading the data while offline, please connect to the internet');
+    }
     var sessionData = JSON.parse(window.sessionStorage.getItem('crypton')).Session;
     if (sessionData === null) {
       callback('Offline server could not be verified');
