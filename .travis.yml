@@ -9,7 +9,7 @@ branches:
     - stable
     - test
     - encryptr
-    - encryptr_test
+    - encryptr-pre-items
 
 services:
   - redis-server
