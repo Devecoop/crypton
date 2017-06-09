@@ -2,8 +2,7 @@
 
 
 [![NPM version](https://img.shields.io/npm/v/crypton-server.svg?style=flat)](https://npmjs.org/package/crypton-server)
-[![Build Status](https://img.shields.io/travis/SpiderOak/crypton.svg?style=flat)](https://travis-ci.org/SpiderOak/crypton)
-[![Test coverage](https://img.shields.io/coveralls/SpiderOak/crypton.svg?style=flat)](https://coveralls.io/r/SpiderOak/crypton?branch=master)
+[![Build Status](https://img.shields.io/travis/SpiderOak/crypton.svg?branch=encryptr-pre-items&style=flat)](https://travis-ci.org/SpiderOak/crypton.svg?branch=encryptr-pre-items)
 
 Crypton is a framework for creating zero-knowledge applications with JavaScript.
 
