@@ -234,12 +234,15 @@ Container.prototype.getPublicName = function () {
 Container.prototype.getHistory = function (callback) {
   var containerNameHmac = this.getPublicName();
   var currentVersion = this.latestVersion();
-  
+  var userContainersName = containerNameHmac + currentVersion;
   if (!crypton.online) {
-    var containers = JSON.parse(window.sessionStorage.getItem('crypton')).containers[containerNameHmac + currentVersion];
-    if (containers === null || containers === undefined){
+    var containers = JSON.parse(window.sessionStorage.getItem('crypton')).containers;
+    var hasContainers = containers !== null && containers !== undefined;
+    var hasUserContainers = hasContainers && containers.hasOwnProperty(userContainersName);
+    if (!hasContainers || !hasUserContainers){
       return callback('container', containerNameHmac, 'not found in sessionStorage');
     }
+    var userContainers = containers[containerNameHmac + currentVersion];
     return callback(null, containers);
   }
 

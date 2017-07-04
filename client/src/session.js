@@ -651,10 +651,13 @@ Session.prototype.loadWithHmac = function (containerNameHmac, peer, callback) {
 Session.prototype.create = function (containerName, callback) {
 
   if (!crypton.online){
-    var container = JSON.parse(window.sessionStorage.getItem('crypton')).containers[containerName];
-    if (container === null || container === undefined){
+    var containers = JSON.parse(window.sessionStorage.getItem('crypton')).containers;
+    var hasContainers = containers !== null && containers !== undefined;
+    var hasContainer = hasContainers && containers.hasOwnProperty(containerName);
+    if (!hasContainers || !hasContainer){
       return callback('Container', containerName, 'not found in sessionStorage');
     }
+    var container = containers[containerName];
     return callback(null, container);
   }
 
