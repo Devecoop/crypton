@@ -1429,7 +1429,10 @@ SRPClient = function (username, password, group, hashFn) {
   
 };
 
-var bcrypt = dcodeIO.bcrypt;
+var bcrypt = null;
+if (typeof dcodeIO !== 'undefined' && dcodeIO.hasOwnProperty('bcrypt')) {
+  bcrypt = dcodeIO.bcrypt;
+}
 
 /*
  * Implementation of an SRP client conforming
